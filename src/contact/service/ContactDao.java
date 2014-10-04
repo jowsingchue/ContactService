@@ -7,10 +7,17 @@ import contact.entity.Contact;
 public interface ContactDao {
 
 	/** Find a contact by ID in contacts.
-	 * @param the id of contact to find
+	 * @param id the id of contact to find
 	 * @return the matching contact or null if the id is not found
 	 */
 	public abstract Contact find(long id);
+	
+	/**
+	 * Find a contact by Title in contacts.
+	 * @param title the title of contact to find
+	 * @return the matching contact or null if the title is not found
+	 */
+	public abstract Contact findByTitle(String title);
 
 	public abstract List<Contact> findAll();
 

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,7 +56,5 @@ public class WebServiceTest {
     @Test
     public void testPost() {
     	
-    	Contact con1 = cr.getContact(1);
-    	assertTrue("con1 must be experiment John", con1.getId() == 1);
     }
 }

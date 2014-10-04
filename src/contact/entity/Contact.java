@@ -26,7 +26,6 @@ public class Contact implements Serializable {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@XmlAttribute
 	private long id;
-	//TODO how to specify a required element or attribute of an entity?
 	@XmlElement(required=true,nillable=false)
 	private String title;
 	private String name;

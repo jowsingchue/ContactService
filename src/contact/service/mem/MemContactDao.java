@@ -40,6 +40,15 @@ public class MemContactDao implements ContactDao {
 			if (c.getId() == id) return c;
 		return null;
 	}
+	
+	/* (non-Javadoc)
+	 * @see contact.service.ContactDao#findByTitle(String)
+	 */
+	public Contact findByTitle(String title) {
+		for(Contact c : contacts) 
+			if (c.getTitle() == title) return c;
+		return null;
+	}
 
 	/* (non-Javadoc)
 	 * @see contact.service.ContactDao#findAll()
