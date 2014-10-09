@@ -45,8 +45,9 @@ public class MemContactDao implements ContactDao {
 	 * @see contact.service.ContactDao#findByTitle(String)
 	 */
 	public Contact findByTitle(String title) {
+		
 		for(Contact c : contacts) 
-			if (c.getTitle() == title) return c;
+			if (c.getTitle().equalsIgnoreCase(title)) return c;
 		return null;
 	}
 

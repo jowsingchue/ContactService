@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.eclipse.jetty.client.HttpClient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -30,6 +31,7 @@ public class WebServiceTest {
 	Contact contact2;
 	Contact contact3;
 
+	HttpClient client;
 	
     @BeforeClass
     public static void doFirst( ) throws Exception {
@@ -51,10 +53,19 @@ public class WebServiceTest {
     	contact1 = new Contact("contact1", "Joe Contact", "joe@microsoft.com");
 		contact2 = new Contact("contact2", "Sally Contract", "sally@foo.com");
 		contact3 = new Contact("contact3", "Foo Bar", "foo@barclub.com");
+        
+        client = new HttpClient();
+        try {
+			client.start();
+		} catch (Exception e) {
+			throw new RuntimeException( e.getMessage() );
+		}
+    
     }
     
     @Test
-    public void testPost() {
+    public void testGetAllContacts() {
+    	
     	
     }
 }

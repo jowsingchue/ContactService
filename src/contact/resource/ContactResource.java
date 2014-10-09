@@ -16,18 +16,24 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
 
+import contact.annotations.PATCH;
 import contact.entity.Contact;
 import contact.service.ContactDao;
 import contact.service.mem.MemDaoFactory;
 
 
 /**
- * ContactResource provide functionalities for saving and retrieving contacts via HTTP request.
+ * ContactResource provide operations for saving and retrieving contacts via HTTP request
+ * using JAX-RS managed request mapping. This class is intended to be invoked by a JAX-RS
+ * framework, not directly from other Java code.
+ * 
  * @author wutichai
  */
 @Path("/contacts")
@@ -41,11 +47,7 @@ public class ContactResource {
 		dao = MemDaoFactory.getInstance().getContactDao();
 		System.out.println("Created a new ContactResource");
 	}
-	
-	// TODO
-	// make getContacts method to return Response with appropriate value
-	// it should return 'Contact' if the client request GET with title query
-	// and it should return 'List<Contact>' if no query provided (query == null)
+
 	/**
 	 * Get all contacts, , or contact by title if title specified.
 	 * @param title Contact title
@@ -53,33 +55,33 @@ public class ContactResource {
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
-	public List<Contact> getContacts(@QueryParam("title") String title) {
-		return dao.findAll();
-		
-/*		
-		System.out.println("title = " + title);
-		ResponseBuilder builder = Response.status(Response.Status.NO_CONTENT);
+	public Response getContacts(@QueryParam("title") String title) {
+
+		System.out.println("GET is called.");
+		System.out.println("GET: title = " + title);
+		ResponseBuilder builder = null;
 		// if title provided, deal with it
-		if(title != null) {
-			System.out.println("There is a title field!");
+		if (title != null) {
+			System.out.println("GET: There is a title field!");
 			Contact contact = dao.findByTitle(title);
 			if(contact == null) { // no match contact title
-				System.out.println("No matched title found");
+				System.out.println("GET: No matched title found");
 				builder = Response.status(Response.Status.NOT_FOUND);
 			}
 			else { // title match contact
-				System.out.println("Matched title found!");
+				System.out.println("GET: Matched title found!");
 				builder = Response.ok(contact, "application/xml");
 			}
 		}
 		// no title provided, return all contacts
 		else {
-			System.out.println("No title field");
+			System.out.println("GET: No title field");
 			List<Contact> contacts = dao.findAll();
-			builder = Response.ok(contacts, MediaType.APPLICATION_XML);
+			builder = Response.ok(
+					new GenericEntity<List<Contact>>(contacts){}, MediaType.APPLICATION_XML);
 		}
 		return builder.build();
-*/	
+
 
 	}
 	
@@ -91,7 +93,7 @@ public class ContactResource {
 	@GET
 	@Path("{id : \\d+}")
 	@Produces("application/xml")
-	public Response getContact(@PathParam("id") int id, @Context Request request) {
+	public Response getContact(@PathParam("id") long id, @Context Request request) {
 		Contact contact = dao.find(id);
 		EntityTag tag = new EntityTag(Integer.toString(contact.hashCode()));
 		ResponseBuilder builder = request.evaluatePreconditions(tag);
@@ -110,8 +112,14 @@ public class ContactResource {
 	@POST
 	@Consumes("application/xml")
 	public Response createContact(Contact contact) {
+// You have to handle 3 cases here:
+// 1. contact has an id attribute > 0 and the id conflicts with an existing contact (return CONFLICT)
+// 2. contact doesn't have id attribute or it is zero. 
+// 2a. save returns true.. this is the case you have
+// 2b. save returns false.. could be application failure or bad request.
 		dao.save(contact);
 		EntityTag tag = new EntityTag(Integer.toString(contact.hashCode()));
+// You must use the uriInfo to discover the actual uri. Don't assume it.
 		ResponseBuilder builder = Response.created(URI.create("/contacts/" + contact.getId()));
 		builder.tag(tag);
 		return builder.build();
@@ -140,6 +148,7 @@ public class ContactResource {
 		// perform the update
 		current.copyOf(update);
 		dao.update(current);
+// Should test wheter update returned true of false.
 		tag = new EntityTag(Integer.toString(current.hashCode()));
 		builder = Response.ok();
 		builder.tag(tag);
@@ -154,11 +163,12 @@ public class ContactResource {
 	 * Make a partial update to the existing contact.
 	 * The old information will remain the same.
 	 */
-/*
+
 	@PATCH
 	@Path("{id : \\d+}")
 	@Consumes("application/xml")
-	public Response patchContact(@PathParam("id") int id, Contact update, @Context UriInfo uriInfo) {
+	public Response patchContact(@PathParam("id") int id, Contact update, @Context Request request) {
+		System.out.println("Patch is called.");
 		Contact current = dao.find(id);
 		// validate patch info
 		if (current == null) {
@@ -176,9 +186,6 @@ public class ContactResource {
 		return Response.ok().build();
 	}
 
-	public @interface PATCH {
-	}
-*/
 	
 	/**
 	 * Delete the existing contact.
